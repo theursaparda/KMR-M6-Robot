@@ -161,7 +161,7 @@ int main(int argc, char **argv) // Programa principal
 				printf("\nInsira comando de deslocamento para o robo (frente/tras/sair)\n");
 				scanf( "%s", opcao);
 				
-				if ((strcmp(opcao, "frente")) == 0)
+				if((strcmp(opcao, "frente")) == 0)
 				{
 					envia_movimento(1);
 					estado = aguardar;
@@ -169,7 +169,7 @@ int main(int argc, char **argv) // Programa principal
 					parar = 0;
 					printf("\nAndando para frente\n");
 				}
-				else if ((strcmp(response, "tras")) == 0)
+				else if((strcmp(opcao, "tras")) == 0)
 				{
 					envia_movimento(0);
 					state = aguardar;
@@ -177,7 +177,7 @@ int main(int argc, char **argv) // Programa principal
 					parar = 0;
 					printf("\nAndando para tras\n");
 				}
-				else if ((strcmp(response, "sair")) == 0)
+				else if((strcmp(opcao, "sair")) == 0)
 				{
 					estado = sair;
 				}
@@ -190,7 +190,7 @@ int main(int argc, char **argv) // Programa principal
 				
 			// Neste instante, o clock() marca um tempo posterior a t_wait
 			case aguardar:
-				if ( ( (clock() - t_wait) / CLOCKS_PER_SEC ) > periodo )
+				if( ( (clock() - t_wait) / CLOCKS_PER_SEC ) > periodo )
 				{
 					parar = 1;
 				}
@@ -209,7 +209,7 @@ int main(int argc, char **argv) // Programa principal
 	}
 		
 	#ifdef CAN_send
-		if (close(s) < 0)
+		if(close(s) < 0)
 		{
 			perror("Close failed");
 			return 1;
