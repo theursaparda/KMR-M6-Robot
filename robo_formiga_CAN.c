@@ -17,7 +17,7 @@
 #define n_pernas 6 // Número de pernas do robô formiga
 #define n_char 2 // Número de caracteres da mensagem CAN. Cada caractere possui 8 bits
 #define CAN_send 1 // Variável de controle para habilitar o envio de mensagens por barramento CAN
-#define periodo 2 // Período de cada movimento do robô em segundos
+#define periodo_robo 2 // Período de movimento completo do robô em segundos
 
 // Define variáveis globais de socket CAN caso a variável de controle p/ envio de mensagens por barramento CAN seja definida
 #ifdef CAN_send
@@ -31,8 +31,7 @@
 
 void mensagem_perna(int msg[n_char])
 	
-	#ifdef CAN_send
-	
+	#ifdef CAN_send	
 		sprintf(frame.data, msg); // Envio da mensagem
 		
 		// Verifica se houve erro no envio da mensagem
@@ -47,7 +46,7 @@ void mensagem_perna(int msg[n_char])
 	
 			for(unsigned int i = 0; i < n_char; i++)
 			{
-				printf("%b ", msg[i]);
+				printf("%b ", msg[i]); // Imprime caracteres em binário
 			}
 		}
 	#endif
@@ -83,7 +82,7 @@ void envia_movimento(int deslocamento)
 		if(deslocamento == 0)
 		{
 			msg[byte] = msg[byte] & !(0xA0 >> bit);
-			printf("\nRegistrando 0 no bit %d do byte %d. Mensagem: %d", bit, byte, msg[byte]); // Perva vai para trás
+			printf("\nRegistrando 0 no bit %d do byte %d. Mensagem: %d", bit, byte, msg[byte]); // Perna vai para trás
 		}
 		else
 		{
@@ -128,7 +127,6 @@ int main(int argc, char **argv) // Programa principal
 	
 	/*----------- Abrindo socket CAN -------------*/
 	#ifdef CAN_send		
-		
 		if ((s = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0)
 		{
 			perror("Socket opening failed");
@@ -172,7 +170,7 @@ int main(int argc, char **argv) // Programa principal
 				else if((strcmp(opcao, "tras")) == 0)
 				{
 					envia_movimento(0);
-					state = aguardar;
+					estado = aguardar;
 					t_wait = clock();
 					parar = 0;
 					printf("\nAndando para tras\n");
@@ -184,26 +182,20 @@ int main(int argc, char **argv) // Programa principal
 				else 
 				{
 					printf("\nComando invalido\n");
-				}
-				
+				}				
 				break;
 				
 			// Neste instante, o clock() marca um tempo posterior a t_wait
 			case aguardar:
-				if( ( (clock() - t_wait) / CLOCKS_PER_SEC ) > periodo )
+				if( ( (clock() - t_wait) / CLOCKS_PER_SEC ) > periodo_robo )
 				{
 					parar = 1;
-				}
-
-				if(parar == 1)
-				{
 					estado = enviar;
-				}
-				
+				}		
 				break;
 
 			case sair:
-				exit(0);
+				exit(0); // Encerra programa
 				break;
 		}
 	}
@@ -216,6 +208,6 @@ int main(int argc, char **argv) // Programa principal
 		}
 	#endif
 
-	printf("\nFim do processo\n");
+	printf("\nFim do programa\n");
 	return 0;
 }
