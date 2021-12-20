@@ -48,11 +48,11 @@ void mensagem_CAN(int msg[n_char])
 		}
 	    else
 		{
-			printf("\nCaracteres enviados para a mbed: ");		
+			printf("\nCaracteres enviados para a mbed:\n");		
 	
 			for(unsigned int i = 0; i < n_char; i++)
 			{
-				printf("%b ", msg[i]); // Imprime caracteres em binário
+				printf("\n%b\n", msg[i]); // Imprime caracteres em binário
 			}
 		}
 	#endif
