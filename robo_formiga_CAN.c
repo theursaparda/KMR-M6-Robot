@@ -18,9 +18,9 @@
 
 /* Número de caracteres da mensagem de controle das pernas robóticas a ser enviada por CAN.
 Cada caractere possui 8 bits, sendo necessários, no mínimo, (6 pernas)*(2 bits/perna) = 12 bits
-para controlar o deslocamento das pernas do robô-formiga. Sendo assim, serão utilizados 2 caracteres para
-transmissão da mensagem. */
-#define n_char 2
+para controlar o deslocamento das pernas do robô-formiga. Sendo assim, serão utilizados 2 caracteres
+(+1 para o terminador "\0") para transmissão da mensagem. */
+#define n_char 3
 
 #define CAN_send 1 // Variável de controle para habilitar o envio de mensagens por barramento CAN
 #define periodo_robo 5 // Tempo de movimento do robô antes de parar, em segundos
@@ -35,7 +35,7 @@ transmissão da mensagem. */
 
 /*----------------------------------------------------------------------------------------*/
 
-void mensagem_CAN(int msg[n_char])
+void mensagem_CAN(char msg[n_char])
 	
 	#ifdef CAN_send	
 		sprintf(frame.data, msg); // Envio da mensagem
@@ -46,11 +46,11 @@ void mensagem_CAN(int msg[n_char])
 			perror("Write failed");
 			return 1;
 		}
-	    else
+	    	else
 		{
 			printf("\nCaracteres enviados para a mbed:\n");		
 	
-			for(unsigned int i = 0; i < n_char; i++)
+			for(unsigned int i = 0; msg[i] != '\0'; i++)
 			{
 				printf("\n%b\n", msg[i]); // Imprime caracteres em binário
 			}
@@ -62,11 +62,11 @@ void mensagem_CAN(int msg[n_char])
 
 void executa_movimento(int deslocamento, int K)
 {
-	int msg[n_char] = {0};
+	char msg[n_char] = NULL; // Todos os bits nulos
 	int bit; // Posição do bit da dupla de variáveis para cada perna
 	int byte = 0; // Número do caractere CAN com as configurações das pernas
 	
-	while(byte < n_char)
+	while(msg[byte] != '\0')
 	{
 		for (unsigned int perna = 1; perna <= n_pernas + 1; perna++)
 		{
@@ -96,12 +96,12 @@ void executa_movimento(int deslocamento, int K)
 			}
 			else if(perna % 2 == 0 && K) // Se número da perna for par e flag K for true, perna abaixa
 			{
-				msg[byte] = msg[byte] & !(0xA0 >> bit);
+				msg[byte] = msg[byte] & ~(0xA0 >> bit);
 				printf("\nRegistrando 0 no bit %d do byte %d. Mensagem: %b\n", bit, byte, msg[byte]);
 			}
 			else if(perna % 2 != 0 && !K) // Se número da perna for ímpar e flag K for false, perna abaixa
 			{
-				msg[byte] = msg[byte] & !(0xA0 >> bit);
+				msg[byte] = msg[byte] & ~(0xA0 >> bit);
 				printf("\nRegistrando 0 no bit %d do byte %d. Mensagem: %b\n", bit, byte, msg[byte]);
 			}
 			else // Se número da perna for ímpar e flag K for true, perna levanta
@@ -114,7 +114,7 @@ void executa_movimento(int deslocamento, int K)
 			
 			if(deslocamento == 0)
 			{
-				msg[byte] = msg[byte] & !(0xA0 >> bit); // Operação AND bit-a-bit
+				msg[byte] = msg[byte] & ~(0xA0 >> bit); // Operação AND bit-a-bit
 				printf("\nRegistrando 0 no bit %d do byte %d. Mensagem: %b\n", bit, byte, msg[byte]); // Robô vai para trás
 			}
 			else
